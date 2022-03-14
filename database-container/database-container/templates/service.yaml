@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "database-container.fullname" . }}
+  labels:
+    {{- include "database-container.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 5432
+      protocol: TCP
+      name: postgres
+  selector:
+    {{- include "database-container.selectorLabels" . | nindent 4 }}

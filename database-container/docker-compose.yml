@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  db:
+    container_name: "postgres"
+    image: "postgres:11.5-alpine"
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
+      - ./scripts:/scripts
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PRECERT_DB=precertification
+      - PRECERT_USER=precert
+      - PRECERT_PASSWORD=precert
+      - CLAIMS_DB=claims
+      - CLAIMS_USER=claims
+      - CLAIMS_PASSWORD=claims

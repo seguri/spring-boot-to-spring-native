@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+    meta.helm.sh/release-name: kube-prometheus-stack
+    meta.helm.sh/release-namespace: default
+  labels:
+    app: kube-prometheus-stack-grafana
+    app.kubernetes.io/instance: kube-prometheus-stack
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: 16.13.0
+    release: kube-prometheus-stack
+  name: precertification-service-monitor
+  namespace: default
+spec:
+  endpoints:
+    - path: /actuator/prometheus
+      targetPort: 8080
+  namespaceSelector:
+    matchNames:
+      - default
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: precertification-service

@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  master:
+    image: locustio/locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./:/mnt/locust
+    command: -f /mnt/locust/main.py --master -H http://localhost:8089
+    network_mode: "host"
+
+  worker:
+    image: locustio/locust
+    volumes:
+      - ./:/mnt/locust
+    command: -f /mnt/locust/main.py --worker --master-host localhost
+    environment:
+      - OKTA_DOMAIN=$OKTA_DOMAIN
+      - OKTA_CLIENT_ID=$OKTA_CLIENT_ID
+      - OKTA_CLIENT_SECRET=$OKTA_CLIENT_SECRET
+      - INTAKE_USER=$INTAKE_USER
+      - INTAKE_PASSWORD=$INTAKE_PASSWORD
+    network_mode: "host"

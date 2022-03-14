@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "claims-service.fullname" . }}
+  labels:
+  {{- include "claims-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "claims-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+    {{- include "claims-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "claims-service.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: CLAIMS_HOST
+              value: 'database-container'
+            - name: CLAIMS_PORT
+              value: '5432'
+            - name: CLAIMS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: claims-db
+            - name: CLAIMS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: claims-user
+            - name: CLAIMS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: claims-password
+            - name: OKTA_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  name: okta-domain
+                  key: OKTA_DOMAIN
+            - name: OKTA_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: okta-client-id
+                  key: OKTA_CLIENT_ID
+            - name: OKTA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: okta-client-secret
+                  key: OKTA_CLIENT_SECRET
+          volumeMounts:
+            - name: application-config
+              mountPath: "/workspace/config"
+              readOnly: true
+          resources:
+      {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: application-config
+          configMap:
+            name: claims-service-config
+            items:
+              - key: application.properties
+                path: application.properties

@@ -1,0 +1,31 @@
+replicaCount: 1
+
+image:
+  repository: precertification-service
+  pullPolicy: IfNotPresent
+  tag: "0.0.1-SNAPSHOT"
+
+serviceAccount:
+  create: true
+  name: "precertification-service-sa"
+
+service:
+  type: ClusterIP
+  port: 80
+  labels:
+    - app.kubernetes.io/name: precertification-service
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: localhost
+      paths:
+        - path: /precertificationrequests
+          pathType: ImplementationSpecific
+
+autoscaling:
+  enabled: false

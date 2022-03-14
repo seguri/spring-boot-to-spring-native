@@ -1,0 +1,16 @@
+loadtest:
+  name: claims-service-loadtest
+  locust_locustfile_configmap: claims-service-loadtest
+  environment_external_secret:
+    okta-domain: [OKTA_DOMAIN]
+    okta-client-id: [OKTA_CLIENT_ID]
+    okta-client-secret: [OKTA_CLIENT_SECRET]
+    okta-intake-user: [INTAKE_USER]
+    okta-intake-password: [INTAKE_PASSWORD]
+ingress:
+  enabled: true
+  hosts:
+     - host: localhost
+       path: /claimsloadtest(/|$)(.*)
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2

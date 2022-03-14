@@ -1,0 +1,1 @@
+Postgres service has been deployed and is reachable within the cluster using service name {{ include "database-container.fullname" . }} on port 5432
